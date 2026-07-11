@@ -32,19 +32,22 @@ export default function InspectorGlobalTable() {
   const [tipoFilter, setTipoFilter] = useState("")
   const [brechasFilter, setBrechasFilter] = useState("")
 
+  function buildParams(): URLSearchParams {
+    const params = new URLSearchParams()
+    if (nombreFilter) params.set("nombre", nombreFilter)
+    if (nivelFilter) params.set("nivelRiesgo", nivelFilter)
+    if (tipoFilter) params.set("tipoPersona", tipoFilter)
+    if (brechasFilter) params.set("brechas", brechasFilter)
+    params.set("sort", sort)
+    params.set("order", order)
+    return params
+  }
+
   const cargar = useCallback(async () => {
     setCargando(true)
     setError(null)
     try {
-      const params = new URLSearchParams()
-      if (nombreFilter) params.set("nombre", nombreFilter)
-      if (nivelFilter) params.set("nivelRiesgo", nivelFilter)
-      if (tipoFilter) params.set("tipoPersona", tipoFilter)
-      if (brechasFilter) params.set("brechas", brechasFilter)
-      params.set("sort", sort)
-      params.set("order", order)
-
-      const res = await fetch(`/api/inspeccion?${params.toString()}`)
+      const res = await fetch(`/api/inspeccion?${buildParams().toString()}`)
       if (!res.ok) throw new Error("Error al cargar")
       const json = await res.json()
       setData(json)
@@ -73,23 +76,34 @@ export default function InspectorGlobalTable() {
     return order === "asc" ? " \u25B2" : " \u25BC"
   }
 
-  const colorScore = (score: number) =>
-    score >= 80 ? "text-green-600" :
-    score >= 50 ? "text-yellow-600" :
-    "text-red-600"
+  const colorScoreMap: Record<number, string> = { 80: "text-green-600", 50: "text-yellow-600" }
+  const barColorMap: Record<number, string> = { 80: "bg-green-500", 50: "bg-yellow-500" }
 
-  const barColor = (score: number) =>
-    score >= 80 ? "bg-green-500" :
-    score >= 50 ? "bg-yellow-500" :
-    "bg-red-500"
+  function colorScore(score: number): string {
+    if (score >= 80) return colorScoreMap[80]
+    if (score >= 50) return colorScoreMap[50]
+    return "text-red-600"
+  }
 
-  const riesgoBadge = (nivel: string) => {
-    const map: Record<string, string> = {
-      alto: "bg-red-100 text-red-800",
-      medio: "bg-yellow-100 text-yellow-800",
-      bajo: "bg-green-100 text-green-800",
-    }
-    return map[nivel] || "bg-zinc-100 text-zinc-800"
+  function barColor(score: number): string {
+    if (score >= 80) return barColorMap[80]
+    if (score >= 50) return barColorMap[50]
+    return "bg-red-500"
+  }
+
+  const riesgoBadgeMap: Record<string, string> = {
+    alto: "bg-red-100 text-red-800",
+    medio: "bg-yellow-100 text-yellow-800",
+    bajo: "bg-green-100 text-green-800",
+  }
+
+  function riesgoBadge(nivel: string): string {
+    return riesgoBadgeMap[nivel] || "bg-zinc-100 text-zinc-800"
+  }
+
+  function ariaSortValue(field: SortField): "ascending" | "descending" | "none" {
+    if (sort !== field) return "none"
+    return order === "asc" ? "ascending" : "descending"
   }
 
   return (
@@ -172,7 +186,7 @@ export default function InspectorGlobalTable() {
                   className="cursor-pointer px-4 py-2 text-left font-medium"
                   onClick={() => toggleSort("nombre")}
                   role="columnheader"
-                  aria-sort={sort === "nombre" ? (order === "asc" ? "ascending" : "descending") : "none"}
+                  aria-sort={ariaSortValue("nombre")}
                 >
                   Nombre{sortArrow("nombre")}
                 </th>
@@ -180,7 +194,7 @@ export default function InspectorGlobalTable() {
                   className="cursor-pointer px-4 py-2 text-left font-medium"
                   onClick={() => toggleSort("tipo")}
                   role="columnheader"
-                  aria-sort={sort === "tipo" ? (order === "asc" ? "ascending" : "descending") : "none"}
+                  aria-sort={ariaSortValue("tipo")}
                 >
                   Tipo{sortArrow("tipo")}
                 </th>
@@ -188,7 +202,7 @@ export default function InspectorGlobalTable() {
                   className="cursor-pointer px-4 py-2 text-left font-medium"
                   onClick={() => toggleSort("nivelRiesgo")}
                   role="columnheader"
-                  aria-sort={sort === "nivelRiesgo" ? (order === "asc" ? "ascending" : "descending") : "none"}
+                  aria-sort={ariaSortValue("nivelRiesgo")}
                 >
                   Riesgo{sortArrow("nivelRiesgo")}
                 </th>
@@ -196,7 +210,7 @@ export default function InspectorGlobalTable() {
                   className="cursor-pointer px-4 py-2 text-left font-medium"
                   onClick={() => toggleSort("score")}
                   role="columnheader"
-                  aria-sort={sort === "score" ? (order === "asc" ? "ascending" : "descending") : "none"}
+                  aria-sort={ariaSortValue("score")}
                 >
                   Cumplimiento{sortArrow("score")}
                 </th>
@@ -204,7 +218,7 @@ export default function InspectorGlobalTable() {
                   className="cursor-pointer px-4 py-2 text-left font-medium"
                   onClick={() => toggleSort("brechas")}
                   role="columnheader"
-                  aria-sort={sort === "brechas" ? (order === "asc" ? "ascending" : "descending") : "none"}
+                  aria-sort={ariaSortValue("brechas")}
                 >
                   Brechas{sortArrow("brechas")}
                 </th>

@@ -17,6 +17,18 @@ type ApiResponse = {
   results: SanctionsMatch[]
 }
 
+function getBadge(score: number) {
+  if (score >= 90) return { label: 'Match confirmado', class: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' }
+  if (score >= 70) return { label: 'Posible match', class: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }
+  return { label: 'Sin match', class: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }
+}
+
+function formatType(type: string): string {
+  if (type === 'I') return 'Individual'
+  if (type === 'E') return 'Entidad'
+  return 'Otro'
+}
+
 export default function SanctionsCheck() {
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
@@ -41,12 +53,6 @@ export default function SanctionsCheck() {
     } finally {
       setLoading(false)
     }
-  }
-
-  function getBadge(score: number) {
-    if (score >= 90) return { label: 'Match confirmado', class: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' }
-    if (score >= 70) return { label: 'Posible match', class: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }
-    return { label: 'Sin match', class: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }
   }
 
   return (
@@ -99,13 +105,13 @@ export default function SanctionsCheck() {
                 {result.results.map((r, i) => {
                   const badge = getBadge(r.score)
                   return (
-                    <div key={i} className="rounded-md border p-3 text-sm">
+                    <div key={r.matchedName} className="rounded-md border p-3 text-sm">
                       <div className="mb-1 flex items-center gap-2">
                         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.class}`}>
                           {badge.label} ({r.score}%)
                         </span>
                         <span className="text-xs text-zinc-400">
-                          {r.type === 'I' ? 'Individual' : r.type === 'E' ? 'Entidad' : 'Otro'}
+                          {formatType(r.type)}
                         </span>
                       </div>
                       <p className="font-medium">{r.matchedName}</p>

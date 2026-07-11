@@ -45,7 +45,7 @@ export default function FeedbackButton() {
   )
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 print:hidden" role="dialog" aria-modal="true">
+    <dialog open className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 print:hidden" aria-modal="true">
       <div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-zinc-900">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Enviar reporte o sugerencia</h2>
@@ -57,8 +57,8 @@ export default function FeedbackButton() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium">Tipo</label>
-              <select value={tipo} onChange={(e) => setTipo(e.target.value)} required className="w-full rounded-md border px-3 py-2 text-sm dark:bg-zinc-800">
+              <label htmlFor="feedback-tipo" className="mb-1 block text-sm font-medium">Tipo</label>
+              <select id="feedback-tipo" value={tipo} onChange={(e) => setTipo(e.target.value)} required className="w-full rounded-md border px-3 py-2 text-sm dark:bg-zinc-800">
                 <option value="">Selecciona...</option>
                 <option value="error">Encontré un error</option>
                 <option value="sugerencia">Tengo una sugerencia</option>
@@ -69,8 +69,8 @@ export default function FeedbackButton() {
 
             {tipo === 'error' && (
               <div>
-                <label className="mb-1 block text-sm font-medium">Severidad</label>
-                <select value={severidad} onChange={(e) => setSeveridad(e.target.value)} required className="w-full rounded-md border px-3 py-2 text-sm dark:bg-zinc-800">
+                <label htmlFor="feedback-severidad" className="mb-1 block text-sm font-medium">Severidad</label>
+                <select id="feedback-severidad" value={severidad} onChange={(e) => setSeveridad(e.target.value)} required className="w-full rounded-md border px-3 py-2 text-sm dark:bg-zinc-800">
                   <option value="">Selecciona...</option>
                   <option value="bloqueante">Me impide trabajar</option>
                   <option value="alta">Es molesto pero puedo seguir</option>
@@ -80,8 +80,9 @@ export default function FeedbackButton() {
             )}
 
             <div>
-              <label className="mb-1 block text-sm font-medium">Descripción</label>
+              <label htmlFor="feedback-descripcion" className="mb-1 block text-sm font-medium">Descripción</label>
               <textarea
+                id="feedback-descripcion"
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
                 placeholder="Cuéntanos qué pasó o qué te gustaría que mejoráramos"
@@ -101,6 +102,6 @@ export default function FeedbackButton() {
           </form>
         )}
       </div>
-    </div>
+    </dialog>
   )
 }

@@ -23,9 +23,9 @@ export default function CookieConsent() {
   if (!visible) return null
 
   return (
-    <div
+    <dialog
+      open
       className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white p-4 shadow-lg dark:bg-zinc-900"
-      role="dialog"
       aria-label="Aviso de cookies"
     >
       <div className="mx-auto flex max-w-4xl flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -53,6 +53,6 @@ export default function CookieConsent() {
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   )
 }

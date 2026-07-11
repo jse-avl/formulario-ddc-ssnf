@@ -100,8 +100,8 @@ export default function NuevoClientePage() {
 
       {paso === 0 && (
         <div className="space-y-4">
-          <label className="mb-1 block text-sm font-medium">Tipo de cliente</label>
-          <select value={form.tipo} onChange={(e) => update('tipo', e.target.value)} className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800">
+          <label htmlFor="tipo" className="mb-1 block text-sm font-medium">Tipo de cliente</label>
+          <select id="tipo" value={form.tipo} onChange={(e) => update('tipo', e.target.value)} className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800">
             <option value="persona_natural">Persona natural</option>
             <option value="persona_juridica">Persona jurídica</option>
             <option value="fideicomiso">Fideicomiso</option>
@@ -113,18 +113,18 @@ export default function NuevoClientePage() {
       {paso === 1 && (
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium">Nombre completo *</label>
-            <input value={form.nombreCompleto} onChange={(e) => update('nombreCompleto', e.target.value)} required className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
+            <label htmlFor="nombreCompleto" className="mb-1 block text-sm font-medium">Nombre completo *</label>
+            <input id="nombreCompleto" value={form.nombreCompleto} onChange={(e) => update('nombreCompleto', e.target.value)} required className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Número de identificación (cédula/pasaporte/RUC) *</label>
-            <input value={form.numeroIdentificacion} onChange={(e) => update('numeroIdentificacion', e.target.value)} required className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
+            <label htmlFor="numeroIdentificacion" className="mb-1 block text-sm font-medium">Número de identificación (cédula/pasaporte/RUC) *</label>
+            <input id="numeroIdentificacion" value={form.numeroIdentificacion} onChange={(e) => update('numeroIdentificacion', e.target.value)} required className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
           </div>
           {form.tipo !== 'persona_natural' && (
             <>
               <div>
-                <label className="mb-1 block text-sm font-medium">Tipo de persona jurídica</label>
-                <select value={form.tipoPersonaJuridica} onChange={(e) => update('tipoPersonaJuridica', e.target.value)} className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800">
+                <label htmlFor="tipoPersonaJuridica" className="mb-1 block text-sm font-medium">Tipo de persona jurídica</label>
+                <select id="tipoPersonaJuridica" value={form.tipoPersonaJuridica} onChange={(e) => update('tipoPersonaJuridica', e.target.value)} className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800">
                   <option value="">Selecciona...</option>
                   <option value="sociedad_anonima">Sociedad Anónima</option>
                   <option value="srl">S.R.L.</option>
@@ -134,26 +134,26 @@ export default function NuevoClientePage() {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium">País de constitución</label>
-                <input value={form.paisConstitucion} onChange={(e) => update('paisConstitucion', e.target.value)} className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
+                <label htmlFor="paisConstitucion" className="mb-1 block text-sm font-medium">País de constitución</label>
+                <input id="paisConstitucion" value={form.paisConstitucion} onChange={(e) => update('paisConstitucion', e.target.value)} className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium">Fecha de inscripción</label>
-                <input type="date" value={form.fechaInscripcion} onChange={(e) => update('fechaInscripcion', e.target.value)} className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
+                <label htmlFor="fechaInscripcion" className="mb-1 block text-sm font-medium">Fecha de inscripción</label>
+                <input id="fechaInscripcion" type="date" value={form.fechaInscripcion} onChange={(e) => update('fechaInscripcion', e.target.value)} className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
               </div>
             </>
           )}
           <div>
-            <label className="mb-1 block text-sm font-medium">Actividad declarada</label>
-            <input value={form.actividadDeclarada} onChange={(e) => update('actividadDeclarada', e.target.value)} className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
+            <label htmlFor="actividadDeclarada" className="mb-1 block text-sm font-medium">Actividad declarada</label>
+            <input id="actividadDeclarada" value={form.actividadDeclarada} onChange={(e) => update('actividadDeclarada', e.target.value)} className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Dirección</label>
-            <input value={form.direccion} onChange={(e) => update('direccion', e.target.value)} className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
+            <label htmlFor="direccion" className="mb-1 block text-sm font-medium">Dirección</label>
+            <input id="direccion" value={form.direccion} onChange={(e) => update('direccion', e.target.value)} className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Jurisdicciones donde opera</label>
-            <input value={form.jurisdiccionesOperacion} onChange={(e) => update('jurisdiccionesOperacion', e.target.value)} placeholder="Ej: Panamá, Estados Unidos" className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
+            <label htmlFor="jurisdiccionesOperacion" className="mb-1 block text-sm font-medium">Jurisdicciones donde opera</label>
+            <input id="jurisdiccionesOperacion" value={form.jurisdiccionesOperacion} onChange={(e) => update('jurisdiccionesOperacion', e.target.value)} placeholder="Ej: Panamá, Estados Unidos" className="w-full rounded-md border px-3 py-2 dark:bg-zinc-800" />
           </div>
         </div>
       )}
@@ -164,7 +164,7 @@ export default function NuevoClientePage() {
             Registra los beneficiarios finales con participación ≥25%. Si nadie alcanza el umbral, deberás agregar una declaración jurada.
           </p>
           {beneficiarios.map((b, i) => (
-            <div key={i} className="rounded-lg border p-4">
+            <div key={b.numeroIdentificacion || `benef-${i}`} className="rounded-lg border p-4">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-sm font-medium">Beneficiario #{i + 1}</span>
                 {beneficiarios.length > 1 && (

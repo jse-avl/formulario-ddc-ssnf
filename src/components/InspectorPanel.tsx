@@ -46,15 +46,20 @@ export default function InspectorPanel({ clienteId }: { clienteId: string }) {
     }
   }
 
-  const colorScore =
-    resultado && resultado.score >= 80 ? "text-green-600" :
-    resultado && resultado.score >= 50 ? "text-yellow-600" :
-    "text-red-600"
+  function getScoreColor(score: number): string {
+    if (score >= 80) return "text-green-600"
+    if (score >= 50) return "text-yellow-600"
+    return "text-red-600"
+  }
 
-  const colorBg =
-    resultado && resultado.score >= 80 ? "border-green-200 bg-green-50 dark:bg-green-950/20" :
-    resultado && resultado.score >= 50 ? "border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20" :
-    "border-red-200 bg-red-50 dark:bg-red-950/20"
+  function getScoreBg(score: number): string {
+    if (score >= 80) return "border-green-200 bg-green-50 dark:bg-green-950/20"
+    if (score >= 50) return "border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20"
+    return "border-red-200 bg-red-50 dark:bg-red-950/20"
+  }
+
+  const colorScore = resultado ? getScoreColor(resultado.score) : "text-red-600"
+  const colorBg = resultado ? getScoreBg(resultado.score) : "border-red-200 bg-red-50 dark:bg-red-950/20"
 
   return (
     <div className="print:hidden">
@@ -64,7 +69,7 @@ export default function InspectorPanel({ clienteId }: { clienteId: string }) {
         className="rounded-md bg-zinc-800 px-4 py-2 text-sm text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-200 dark:text-black dark:hover:bg-zinc-300"
         aria-label="Verificar cumplimiento normativo del expediente"
       >
-        {cargando ? "Verificando..." : resultado ? "Ocultar verificación" : "Verificar cumplimiento"}
+        {cargando ? "Verificando..." : (resultado ? "Ocultar verificación" : "Verificar cumplimiento")}
       </button>
 
       {error && (
@@ -74,7 +79,6 @@ export default function InspectorPanel({ clienteId }: { clienteId: string }) {
       {abierto && resultado && (
         <section
           className={`mt-4 rounded-lg border p-4 ${colorBg}`}
-          role="region"
           aria-label="Resultado de verificación de cumplimiento"
         >
           <div className="mb-3 flex items-center justify-between">

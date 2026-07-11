@@ -53,6 +53,60 @@ function tokenMatchRatio(aTokens: string[], bTokens: string[]): number {
   return intersection.size / union.size
 }
 
+function buildResult(entry: SdnEntry, score: number): MatchResult {
+  return {
+    score,
+    match: score >= 70,
+    matchedName: entry.n,
+    type: entry.t,
+    program: entry.p,
+  }
+}
+
+function tryExactMatch(normalized: string, entry: SdnEntry): MatchResult | null {
+  if (normalized !== normalize(entry.n)) return null
+  return { score: 100, match: true, matchedName: entry.n, type: entry.t, program: entry.p }
+}
+
+function trySubstringMatch(normalized: string, entry: SdnEntry): MatchResult | null {
+  const entryNormalized = normalize(entry.n)
+  const isEntryInQuery = entryNormalized.includes(normalized)
+  const isQueryInEntry = normalized.includes(entryNormalized)
+  if (!isEntryInQuery && !isQueryInEntry) return null
+  const score = Math.min(95, 70 + Math.min(entryNormalized.length, normalized.length) * 2)
+  return { score, match: score >= 80, matchedName: entry.n, type: entry.t, program: entry.p }
+}
+
+function tryTokenMatch(
+  queryTokens: string[],
+  entry: SdnEntry,
+  minRatio: number,
+  maxScore: number
+): MatchResult | null {
+  const entryTokens = tokenize(normalize(entry.n))
+  const tmr = tokenMatchRatio(queryTokens, entryTokens)
+  if (tmr <= minRatio) return null
+  const score = Math.min(maxScore, Math.round(tmr * 100))
+  return buildResult(entry, score)
+}
+
+function tryLevenshteinMatch(normalized: string, entry: SdnEntry): MatchResult | null {
+  const entryNormalized = normalize(entry.n)
+  const maxLen = Math.max(normalized.length, entryNormalized.length)
+  if (maxLen <= 3) return null
+  const dist = levenshtein(normalized, entryNormalized)
+  const similarity = 1 - dist / maxLen
+  if (similarity <= 0.7) return null
+  const score = Math.min(75, Math.round(similarity * 100))
+  return buildResult(entry, score)
+}
+
+function updateBest(current: MatchResult | null, candidate: MatchResult | null): MatchResult | null {
+  if (!candidate) return current
+  if (!current || candidate.score > current.score) return candidate
+  return current
+}
+
 export function matchName(query: string, entries: SdnEntry[]): MatchResult | null {
   const normalized = normalize(query)
   if (!normalized) return null
@@ -63,73 +117,35 @@ export function matchName(query: string, entries: SdnEntry[]): MatchResult | nul
   let best: MatchResult | null = null
 
   for (const entry of entries) {
-    const entryNormalized = normalize(entry.n)
-    const entryTokens = tokenize(entryNormalized)
+    const exact = tryExactMatch(normalized, entry)
+    best = updateBest(best, exact)
+    if (exact) continue
 
-    // Exact match
-    if (normalized === entryNormalized) {
-      const r: MatchResult = {
-        score: 100,
-        match: true,
-        matchedName: entry.n,
-        type: entry.t,
-        program: entry.p,
-      }
-      if (!best || r.score > best.score) best = r
-      continue
-    }
+    const substring = trySubstringMatch(normalized, entry)
+    best = updateBest(best, substring)
+    if (substring) continue
 
-    // Substring match
-    if (entryNormalized.includes(normalized) || normalized.includes(entryNormalized)) {
-      const score = Math.min(95, 70 + Math.min(entryNormalized.length, normalized.length) * 2)
-      const r: MatchResult = {
-        score,
-        match: score >= 80,
-        matchedName: entry.n,
-        type: entry.t,
-        program: entry.p,
-      }
-      if (!best || r.score > best.score) {
-        if (!best || r.score > best.score) best = r
-      }
-      continue
-    }
+    const token = tryTokenMatch(queryTokens, entry, 0.6, 85)
+    best = updateBest(best, token)
+    if (token) continue
 
-    // Token match ratio
-    const tmr = tokenMatchRatio(queryTokens, entryTokens)
-    if (tmr > 0.6) {
-      const score = Math.min(85, Math.round(tmr * 100))
-      const r: MatchResult = {
-        score,
-        match: score >= 75,
-        matchedName: entry.n,
-        type: entry.t,
-        program: entry.p,
-      }
-      if (!best || r.score > best.score) best = r
-      continue
-    }
-
-    // Levenshtein for similar-length names
-    const maxLen = Math.max(normalized.length, entryNormalized.length)
-    if (maxLen > 3) {
-      const dist = levenshtein(normalized, entryNormalized)
-      const similarity = 1 - dist / maxLen
-      if (similarity > 0.7) {
-        const score = Math.min(75, Math.round(similarity * 100))
-        const r: MatchResult = {
-          score,
-          match: score >= 70,
-          matchedName: entry.n,
-          type: entry.t,
-          program: entry.p,
-        }
-        if (!best || r.score > best.score) best = r
-      }
-    }
+    const lev = tryLevenshteinMatch(normalized, entry)
+    best = updateBest(best, lev)
   }
 
   return best
+}
+
+function computeScore(normalized: string, queryTokens: string[], entryNormalized: string, entryTokens: string[]): number {
+  if (normalized === entryNormalized) return 100
+  if (entryNormalized.includes(normalized) || normalized.includes(entryNormalized)) {
+    return 70 + Math.min(entryNormalized.length, normalized.length)
+  }
+  const tmr = tokenMatchRatio(queryTokens, entryTokens)
+  if (tmr > 0.5) return Math.round(tmr * 90)
+  const maxLen = Math.max(normalized.length, entryNormalized.length)
+  if (maxLen <= 3) return 0
+  return Math.round((1 - levenshtein(normalized, entryNormalized) / maxLen) * 100)
 }
 
 export function matchNameBulk(
@@ -148,41 +164,15 @@ export function matchNameBulk(
   for (const entry of entries) {
     const entryNormalized = normalize(entry.n)
     const entryTokens = tokenize(entryNormalized)
-
-    let score = 0
-
-    if (normalized === entryNormalized) {
-      score = 100
-    } else if (entryNormalized.includes(normalized) || normalized.includes(entryNormalized)) {
-      score = 70 + Math.min(entryNormalized.length, normalized.length)
-    } else {
-      const tmr = tokenMatchRatio(queryTokens, entryTokens)
-      if (tmr > 0.5) score = Math.round(tmr * 90)
-      else {
-        const maxLen = Math.max(normalized.length, entryNormalized.length)
-        if (maxLen > 3) {
-          const dist = levenshtein(normalized, entryNormalized)
-          score = Math.round((1 - dist / maxLen) * 100)
-        }
-      }
-    }
+    const score = computeScore(normalized, queryTokens, entryNormalized, entryTokens)
 
     if (score >= 60) {
-      results.push({
-        score,
-        result: {
-          score,
-          match: score >= 70,
-          matchedName: entry.n,
-          type: entry.t,
-          program: entry.p,
-        },
-      })
+      results.push({ score, result: buildResult(entry, score) })
     }
   }
 
   return results
-    .sort((a, b) => b.score - a.score)
+    .toSorted((a, b) => b.score - a.score)
     .slice(0, limit)
     .map((r) => r.result)
 }

@@ -4,6 +4,12 @@ import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import SanctionsCheck from "@/components/SanctionsCheck"
 
+function riesgoBadgeClass(nivel: string): string {
+  if (nivel === "alto") return "bg-red-100 text-red-800"
+  if (nivel === "medio") return "bg-yellow-100 text-yellow-800"
+  return "bg-green-100 text-green-800"
+}
+
 export default async function DashboardPage() {
   const session = await auth()
   if (!session.userId) return null
@@ -65,11 +71,7 @@ export default async function DashboardPage() {
                     <p className="font-medium">{c.nombreCompleto}</p>
                     <p className="text-xs text-zinc-400">{c.numeroIdentificacion} · {c.tipo.replace(/_/g, " ")}</p>
                   </div>
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                    c.nivelRiesgo === "alto" ? "bg-red-100 text-red-800" :
-                    c.nivelRiesgo === "medio" ? "bg-yellow-100 text-yellow-800" :
-                    "bg-green-100 text-green-800"
-                  }`}>
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${riesgoBadgeClass(c.nivelRiesgo)}`}>
                     {c.nivelRiesgo.toUpperCase()}
                   </span>
                 </Link>

@@ -4,6 +4,12 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import InspectorPanel from "@/components/InspectorPanel"
 
+function riesgoColor(nivel: string): string {
+  if (nivel === "alto") return "text-red-600"
+  if (nivel === "medio") return "text-yellow-600"
+  return "text-green-600"
+}
+
 export const metadata: Metadata = { title: "Expediente — DDC-SSNF" }
 
 export default async function ExpedientePage({ params }: { params: Promise<{ id: string }> }) {
@@ -41,7 +47,7 @@ export default async function ExpedientePage({ params }: { params: Promise<{ id:
         <p className="text-sm text-zinc-500">ID: {cliente.numeroIdentificacion}</p>
         <p className="text-sm text-zinc-500">Tipo: {cliente.tipo.replace(/_/g, " ")}</p>
         <p className="text-sm text-zinc-500">
-          Riesgo: <span className={`font-medium ${cliente.nivelRiesgo === "alto" ? "text-red-600" : cliente.nivelRiesgo === "medio" ? "text-yellow-600" : "text-green-600"}`}>{cliente.nivelRiesgo.toUpperCase()}</span>
+          Riesgo: <span className={`font-medium ${riesgoColor(cliente.nivelRiesgo)}`}>{cliente.nivelRiesgo.toUpperCase()}</span>
         </p>
         <p className="text-xs text-zinc-400">
           Versión: {cliente.versionNumero} · Generado: {new Date().toLocaleDateString("es-PA")}
@@ -128,8 +134,8 @@ export default async function ExpedientePage({ params }: { params: Promise<{ id:
             Evaluado el {ultimaEval.fecha.toLocaleDateString("es-PA")}
           </p>
           <div className="space-y-1">
-            {factores.map((f: any, i: number) => (
-              <div key={i} className="flex items-center gap-2 text-sm">
+            {factores.map((f: any) => (
+              <div key={f.nombre} className="flex items-center gap-2 text-sm">
                 <span className={`h-2 w-2 rounded-full ${f.activo ? "bg-red-500" : "bg-green-500"}`} />
                 <span className={f.activo ? "" : "text-zinc-400 line-through"}>{f.nombre}</span>
               </div>
