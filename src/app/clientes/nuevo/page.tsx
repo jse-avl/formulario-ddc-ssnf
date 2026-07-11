@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import LiveRiskBar from '@/components/LiveRiskBar'
 
 type FormData = {
   tipo: string
@@ -97,6 +98,15 @@ export default function NuevoClientePage() {
           </div>
         ))}
       </nav>
+
+      <LiveRiskBar
+        nombreCompleto={form.nombreCompleto}
+        tipo={form.tipo}
+        tipoPersonaJuridica={form.tipoPersonaJuridica}
+        paisConstitucion={form.paisConstitucion}
+        jurisdiccionesOperacion={form.jurisdiccionesOperacion}
+        beneficiarios={beneficiarios}
+      />
 
       {paso === 0 && (
         <div className="space-y-4">
