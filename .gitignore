@@ -46,3 +46,6 @@ next-env.d.ts
 docs/Documento_Final_DDC_SSNF.html
 docs/Guiones_Video_Scrum_Review.md
 docs/PPT_Prompt_Kimi.md
+
+# clerk configuration (can include secrets)
+/.clerk/
