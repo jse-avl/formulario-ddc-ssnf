@@ -1,0 +1,171 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String   @id @default(cuid())
+  clerkId              String   @unique
+  email                String
+  nombre               String
+  rol                  String   @default("abogado")
+  planActual           String   @default("trial")
+  fechaRegistro        DateTime @default(now())
+  fechaFinTrial        DateTime?
+  fechaConversionPago  DateTime?
+
+  clientes            Cliente[]
+  evaluacionesRiesgo  EvaluacionRiesgo[]
+  configuracionRiesgo ConfiguracionRiesgo[]
+  operacionesMarcadas OperacionMarcada[]
+  logAuditoria        LogAuditoria[]
+  reportesUsuario     ReporteUsuario[]
+}
+
+model Cliente {
+  id                        String   @id @default(cuid())
+  usuarioId                 String
+  tipo                      String
+  nombreCompleto            String
+  tipoPersonaJuridica       String?
+  numeroIdentificacion      String
+  paisConstitucion          String?
+  fechaInscripcion          DateTime?
+  direccion                 String?
+  actividadDeclarada        String?
+  jurisdiccionesOperacion   String?
+  nivelRiesgo               String   @default("bajo")
+  fechaEvaluacionRiesgo     DateTime?
+  fechaCreacion             DateTime @default(now())
+  fechaUltimaActualizacion  DateTime @default(now())
+  proximaActualizacionReq   DateTime?
+  completado                Boolean  @default(false)
+  versionGrupoId            String
+  versionNumero             Int      @default(1)
+  vigente                   Boolean  @default(true)
+
+  usuario              User   @relation(fields: [usuarioId], references: [id])
+  beneficiarios        BeneficiarioFinal[]
+  documentos           Documento[]
+  evaluacionesRiesgo   EvaluacionRiesgo[]
+  operacionesMarcadas  OperacionMarcada[]
+  verificaciones       VerificacionSancion[]
+
+  @@unique(fields: [versionGrupoId, versionNumero])
+  @@index([versionGrupoId])
+}
+
+model BeneficiarioFinal {
+  id                       String @id @default(cuid())
+  clienteId                String
+  nombreCompleto           String
+  numeroIdentificacion     String
+  porcentajeParticipacion  Float
+  fechaAdquisicionCondicion DateTime?
+  metodoIdentificacion     String
+
+  cliente Cliente @relation(fields: [clienteId], references: [id])
+}
+
+model Documento {
+  id              String   @id @default(cuid())
+  clienteId       String
+  tipoDocumento   String
+  nombreOriginal  String?
+  archivoUrl      String
+  fechaCarga      DateTime @default(now())
+  fechaVencimiento DateTime?
+  verificado      Boolean  @default(false)
+  verificadoPor   String?
+  fechaVerificacion DateTime?
+
+  cliente Cliente @relation(fields: [clienteId], references: [id])
+}
+
+model EvaluacionRiesgo {
+  id              String   @id @default(cuid())
+  clienteId       String
+  usuarioId       String
+  fecha           DateTime @default(now())
+  nivelResultante String
+  factoresJson    String
+
+  cliente Cliente @relation(fields: [clienteId], references: [id])
+  usuario User    @relation(fields: [usuarioId], references: [id])
+}
+
+model ConfiguracionRiesgo {
+  id        String  @id @default(cuid())
+  usuarioId String?
+  variable  String
+  umbral    Float?
+  peso      Float?
+  activo    Boolean @default(true)
+
+  usuario User? @relation(fields: [usuarioId], references: [id])
+}
+
+model OperacionMarcada {
+  id          String   @id @default(cuid())
+  clienteId   String
+  usuarioId   String
+  fecha       DateTime @default(now())
+  tipo        String
+  descripcion String
+  estado      String   @default("abierta")
+
+  cliente Cliente @relation(fields: [clienteId], references: [id])
+  usuario User    @relation(fields: [usuarioId], references: [id])
+}
+
+model VerificacionSancion {
+  id                String   @id @default(cuid())
+  clienteId         String
+  fechaVerificacion DateTime @default(now())
+  proveedorUsado    String   @default("OFAC_SDN")
+  resultado         String
+  scoreConfianza    Float?
+  detalleJson       String?
+  revisadoPor       String?
+  accionTomada      String   @default("ninguna")
+
+  cliente Cliente @relation(fields: [clienteId], references: [id])
+}
+
+model ReporteUsuario {
+  id                   String   @id @default(cuid())
+  usuarioId            String
+  tipo                 String
+  categoria            String
+  titulo               String
+  descripcion          String
+  severidad            String?
+  pantallaOrigen       String?
+  navegadorDispositivo String?
+  capturaPantallaUrl   String?
+  estado               String   @default("nuevo")
+  respuestaAdmin       String?
+  fechaCreacion        DateTime @default(now())
+  fechaActualizacion   DateTime @default(now())
+  fechaResolucion      DateTime?
+  notificadoAlUsuario  Boolean  @default(false)
+
+  usuario User @relation(fields: [usuarioId], references: [id])
+}
+
+model LogAuditoria {
+  id              String   @id @default(cuid())
+  usuarioId       String
+  accion          String
+  entidadAfectada String
+  entidadId       String?
+  fecha           DateTime @default(now())
+  ipOrigen        String?
+  detalle         String?
+
+  usuario User @relation(fields: [usuarioId], references: [id])
+}
